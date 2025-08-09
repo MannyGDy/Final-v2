@@ -105,9 +105,10 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/stats', statsRouter);
 
-// Fallback to index
+// Fallback to index for client-side navigation only (no file extension)
 app.use((req, res, next) => {
   if (req.method.toUpperCase() !== 'GET') return next();
+  if (path.extname(req.path)) return next();
   const indexPath = path.join(publicDir, 'index.html');
   if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
   return res.status(404).send('Not Found');
