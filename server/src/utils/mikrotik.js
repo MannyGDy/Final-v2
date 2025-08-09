@@ -1,7 +1,7 @@
 import { RouterOSAPI } from 'node-routeros';
 
 export async function addHotspotUser({ host, user, password, tls, port, username, profile, comment }) {
-  const conn = new RouterOSAPI({ host, user, password, tls: !!tls, port: Number(port || 8728), keepalive: true, timeout: 5000 });
+  const conn = new RouterOSAPI({ host, user, password, tls: !!tls, port: Number(port || (tls ? 8729 : 8728)), keepalive: true, timeout: 5000 });
   try {
     await conn.connect();
     const existing = await conn.write('/ip/hotspot/user/print', { '.proplist': '.id,name', '?name': username });
@@ -19,10 +19,13 @@ export async function addHotspotUser({ host, user, password, tls, port, username
 }
 
 export async function authorizeByAddressList({ host, user, password, tls, port, ipAddress, comment }) {
-  const conn = new RouterOSAPI({ host, user, password, tls: !!tls, port: Number(port || 8728), keepalive: true, timeout: 5000 });
+  const conn = new RouterOSAPI({ host, user, password, tls: !!tls, port: Number(port || (tls ? 8729 : 8728)), keepalive: true, timeout: 5000 });
   try {
     await conn.connect();
-    await conn.write('/ip/firewall/address-list/add', { list: 'allowed', address: ipAddress, comment: comment || '' });
+    const existing = await conn.write('/ip/firewall/address-list/print', { '.proplist': '.id,address', '?address': ipAddress, '?list': 'allowed' });
+    if (!existing || existing.length === 0) {
+      await conn.write('/ip/firewall/address-list/add', { list: 'allowed', address: ipAddress, comment: comment || '' });
+    }
     await conn.close();
     return { ok: true };
   } catch (err) {

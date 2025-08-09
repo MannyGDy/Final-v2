@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon src/app.js",
     "start": "NODE_ENV=production node src/app.js",
+    "serve": "PORT=${PORT:-8080} HOST=${HOST:-0.0.0.0} NODE_ENV=production node src/app.js",
     "postinstall": "node scripts/postinstall.js"
   },
   "dependencies": {

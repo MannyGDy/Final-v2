@@ -6,6 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 Environment=NODE_ENV=production
+EnvironmentFile=-/opt/captive-portal/server/.env
 WorkingDirectory=/opt/captive-portal/server
 ExecStart=/usr/bin/node /opt/captive-portal/server/src/app.js
 Restart=on-failure

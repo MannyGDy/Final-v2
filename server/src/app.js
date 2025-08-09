@@ -20,6 +20,17 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Respect reverse proxies (e.g., Nginx) when deployed publicly
+const trustProxyEnv = process.env.TRUST_PROXY || '';
+if (trustProxyEnv) {
+  let trustValue;
+  if (trustProxyEnv === 'true') trustValue = 1;
+  else if (trustProxyEnv === 'false') trustValue = false;
+  else if (!Number.isNaN(Number(trustProxyEnv))) trustValue = Number(trustProxyEnv);
+  else trustValue = trustProxyEnv; // e.g., 'loopback', '127.0.0.1'
+  app.set('trust proxy', trustValue);
+}
+
 app.disable('x-powered-by');
 app.use(helmet({
   contentSecurityPolicy: {
@@ -53,19 +64,29 @@ app.use(
         port: Number(process.env.PGPORT || 5432),
         database: process.env.PGDATABASE || 'radius',
         user: process.env.PGUSER || 'radius',
-        password: process.env.PGPASSWORD || 'radius'
+        password: process.env.PGPASSWORD || 'radius',
+        ssl: (process.env.PGSSL === 'true') ? { rejectUnauthorized: process.env.PGSSL_REJECT_UNAUTHORIZED !== 'false' } : undefined
       }
     }),
     cookie: {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false
+      sameSite: (process.env.COOKIE_SAMESITE || 'lax'),
+      // If behind a proxy/HTTPS, set COOKIE_SECURE=auto (or true) and TRUST_PROXY appropriately
+      secure: (process.env.COOKIE_SECURE === 'true' ? true : (process.env.COOKIE_SECURE === 'auto' ? 'auto' : false)),
+      maxAge: process.env.SESSION_TTL_SECONDS ? Number(process.env.SESSION_TTL_SECONDS) * 1000 : undefined
     }
   })
 );
 
-// Static assets
-const publicDir = path.resolve(__dirname, '../../web');
+// Static assets (allow override). Prefer env PUBLIC_DIR, else try project-level web, else server/web
+const publicDir = (() => {
+  const envPath = process.env.PUBLIC_DIR ? path.resolve(process.env.PUBLIC_DIR) : null;
+  const projectWeb = path.resolve(__dirname, '../../web');
+  const serverWeb = path.resolve(__dirname, '../web');
+  if (envPath && fs.existsSync(envPath)) return envPath;
+  if (fs.existsSync(projectWeb)) return projectWeb;
+  return serverWeb;
+})();
 app.use('/', express.static(publicDir, { maxAge: '7d', extensions: ['html'] }));
 
 // Dependency health check
@@ -93,9 +114,10 @@ app.use((req, res, next) => {
 });
 
 const port = Number(process.env.PORT || 8080);
-app.listen(port, () => {
+const host = process.env.HOST || '0.0.0.0';
+app.listen(port, host, () => {
   // eslint-disable-next-line no-console
-  console.log(`Captive portal listening on port ${port}`);
+  console.log(`Captive portal listening on http://${host}:${port}`);
 });
 
 // Initialize schema asynchronously so static pages serve even if DB is down

@@ -17,6 +17,7 @@ export async function createPool() {
     database: process.env.PGDATABASE || 'radius',
     user: process.env.PGUSER || 'radius',
     password: process.env.PGPASSWORD || 'radius',
+    ssl: (process.env.PGSSL === 'true') ? { rejectUnauthorized: process.env.PGSSL_REJECT_UNAUTHORIZED !== 'false' } : undefined,
     max: 20,
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 10000
