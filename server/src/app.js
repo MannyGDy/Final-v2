@@ -93,15 +93,15 @@ app.use((req, res, next) => {
 });
 
 const port = Number(process.env.PORT || 8080);
-ensureSchema().then(() => {
-  app.listen(port, () => {
-    // eslint-disable-next-line no-console
-    console.log(`Captive portal listening on port ${port}`);
-  });
-}).catch((err) => {
+app.listen(port, () => {
   // eslint-disable-next-line no-console
-  console.error('Failed to initialize schema', err);
-  process.exit(1);
+  console.log(`Captive portal listening on port ${port}`);
+});
+
+// Initialize schema asynchronously so static pages serve even if DB is down
+ensureSchema().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('Schema init error (continuing):', err.message);
 });
 
 

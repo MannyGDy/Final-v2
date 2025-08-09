@@ -76,7 +76,7 @@ router.post('/signin', async (req, res) => {
     );
     if (result.rowCount === 0) return res.status(401).json({ ok: false, error: 'Invalid credentials' });
 
-    // MikroTik integration
+    // MikroTik integration (optional if MT_HOST not set)
     const mt = {
       host: process.env.MT_HOST,
       user: process.env.MT_USER,
@@ -86,24 +86,26 @@ router.post('/signin', async (req, res) => {
     };
     const sessionId = `${email}-${Date.now()}`;
 
-    const addUser = await addHotspotUser({
-      host: mt.host,
-      user: mt.user,
-      password: mt.password,
-      tls: mt.tls,
-      port: mt.port,
-      username: email,
-      profile: 'default',
-      comment: sessionId
-    });
-    if (!addUser.ok) return res.status(502).json({ ok: false, error: `MikroTik error: ${addUser.error}` });
-
-    if (clientIp) {
-      const allow = await authorizeByAddressList({
-        host: mt.host, user: mt.user, password: mt.password, tls: mt.tls, port: mt.port,
-        ipAddress: clientIp, comment: sessionId
+    if (mt.host) {
+      const addUser = await addHotspotUser({
+        host: mt.host,
+        user: mt.user,
+        password: mt.password,
+        tls: mt.tls,
+        port: mt.port,
+        username: email,
+        profile: 'default',
+        comment: sessionId
       });
-      if (!allow.ok) return res.status(502).json({ ok: false, error: `MikroTik error: ${allow.error}` });
+      if (!addUser.ok) return res.status(502).json({ ok: false, error: `MikroTik error: ${addUser.error}` });
+
+      if (clientIp) {
+        const allow = await authorizeByAddressList({
+          host: mt.host, user: mt.user, password: mt.password, tls: mt.tls, port: mt.port,
+          ipAddress: clientIp, comment: sessionId
+        });
+        if (!allow.ok) return res.status(502).json({ ok: false, error: `MikroTik error: ${allow.error}` });
+      }
     }
 
     req.session.user = { email, sessionId };
