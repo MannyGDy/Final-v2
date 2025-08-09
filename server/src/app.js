@@ -89,6 +89,32 @@ const publicDir = (() => {
 })();
 app.use('/', express.static(publicDir, { maxAge: '7d', extensions: ['html'] }));
 
+// Fallback vendor assets from node_modules if web/vendor is missing
+try {
+  const nmDir = path.resolve(process.cwd(), 'node_modules');
+  app.get('/vendor/bootstrap/bootstrap.min.css', (req, res, next) => {
+    const localPath = path.join(publicDir, 'vendor/bootstrap/bootstrap.min.css');
+    if (fs.existsSync(localPath)) return res.sendFile(localPath);
+    const nmPath = path.join(nmDir, 'bootstrap/dist/css/bootstrap.min.css');
+    if (fs.existsSync(nmPath)) return res.sendFile(nmPath);
+    return next();
+  });
+  app.get('/vendor/bootstrap/bootstrap.bundle.min.js', (req, res, next) => {
+    const localPath = path.join(publicDir, 'vendor/bootstrap/bootstrap.bundle.min.js');
+    if (fs.existsSync(localPath)) return res.sendFile(localPath);
+    const nmPath = path.join(nmDir, 'bootstrap/dist/js/bootstrap.bundle.min.js');
+    if (fs.existsSync(nmPath)) return res.sendFile(nmPath);
+    return next();
+  });
+  app.get('/vendor/chart.js/chart.umd.js', (req, res, next) => {
+    const localPath = path.join(publicDir, 'vendor/chart.js/chart.umd.js');
+    if (fs.existsSync(localPath)) return res.sendFile(localPath);
+    const nmPath = path.join(nmDir, 'chart.js/dist/chart.umd.js');
+    if (fs.existsSync(nmPath)) return res.sendFile(nmPath);
+    return next();
+  });
+} catch {}
+
 // Dependency health check
 app.get('/health', async (req, res) => {
   try {
