@@ -1,0 +1,19 @@
+[Unit]
+Description=Captive Portal Web App
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=NODE_ENV=production
+WorkingDirectory=/opt/captive-portal/server
+ExecStart=/usr/bin/node /opt/captive-portal/server/src/app.js
+Restart=on-failure
+RestartSec=5
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
+
+

@@ -1,0 +1,4 @@
+:root{--brand:#0d6efd}
+.hero-gradient{background:radial-gradient(1200px 600px at 10% -20%, #e9f2ff, transparent), radial-gradient(1200px 600px at 110% 120%, #e9fff2, transparent)}
+.card-flat{box-shadow:0 10px 30px rgba(0,0,0,.08);border:none}
+

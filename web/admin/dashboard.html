@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css" />
+    <style>
+      .table-responsive { max-height: 55vh; }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Captive Portal Admin</a>
+        <div class="d-flex">
+          <button class="btn btn-outline-light btn-sm" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-4">
+      <div class="row g-4">
+        <div class="col-12 col-lg-4">
+          <div class="card p-3">
+            <h5>Overview</h5>
+            <div class="row text-center">
+              <div class="col">
+                <div class="display-6" id="totalUsers">0</div>
+                <div class="text-muted">Total Users</div>
+              </div>
+              <div class="col">
+                <div class="display-6" id="activeUsers">0</div>
+                <div class="text-muted">Active (24h)</div>
+              </div>
+              <div class="col">
+                <div class="display-6" id="totalData">0 GB</div>
+                <div class="text-muted">Data Used</div>
+              </div>
+            </div>
+            <canvas id="usageChart" height="160"></canvas>
+          </div>
+        </div>
+        <div class="col-12 col-lg-8">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Users</h5>
+              <div>
+                <a href="/api/admin/users.csv" class="btn btn-sm btn-outline-primary">Download CSV</a>
+              </div>
+            </div>
+            <input class="form-control mb-2" placeholder="Filter by name, email or company" id="filterInput" />
+            <div class="table-responsive">
+              <table class="table table-sm table-hover" id="usersTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Registered</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Per-user statistics</h5>
+              <div>
+                <a href="/api/stats/per-user.csv" class="btn btn-sm btn-outline-primary">Export CSV</a>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm" id="statsTable">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Sessions</th>
+                    <th>Last Login</th>
+                    <th>Total Time</th>
+                    <th>In</th>
+                    <th>Out</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/vendor/chart.js/chart.umd.js"></script>
+    <script src="/js/admin-dashboard.js"></script>
+  </body>
+  </html>
+
+
